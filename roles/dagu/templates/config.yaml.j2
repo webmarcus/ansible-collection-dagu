@@ -1,0 +1,154 @@
+# Dagu Configuration
+# Managed by Ansible - DO NOT EDIT MANUALLY
+# Node: {{ inventory_hostname }} ({{ dagu_node_type }})
+#
+# Official Documentation: https://docs.dagu.cloud/configurations/
+
+# Server Configuration
+host: "{{ dagu_host }}"
+port: {{ dagu_port }}
+{% if dagu_base_path %}
+basePath: "{{ dagu_base_path }}"
+{% endif %}
+apiBasePath: "{{ dagu_api_base_path }}"
+tz: "{{ dagu_tz }}"
+debug: {{ dagu_debug | lower }}
+logFormat: "{{ dagu_log_format }}"
+headless: {{ dagu_headless | lower }}
+
+# Paths Configuration
+paths:
+  dagsDir: "{{ dagu_install_dir }}/dags"
+  logDir: "{{ dagu_install_dir }}/logs"
+  dataDir: "{{ dagu_install_dir }}/data"
+  suspendFlagsDir: "{{ dagu_suspend_flags_dir }}"
+  adminLogsDir: "{{ dagu_admin_logs_dir }}"
+{% if dagu_create_base_config %}
+  baseConfig: "{{ dagu_base_config_file }}"
+{% endif %}
+
+# Authentication
+auth:
+  basic:
+    enabled: {{ dagu_enable_basic_auth | lower }}
+{% if dagu_enable_basic_auth %}
+    username: "{{ dagu_basic_auth_username }}"
+    password: "${DAGU_BASIC_AUTH_PASSWORD}"
+{% endif %}
+{% if dagu_enable_token_auth %}
+  token:
+    value: "${DAGU_AUTH_TOKEN}"
+{% endif %}
+{% if dagu_enable_oidc_auth %}
+  oidc:
+    enabled: true
+    provider: "{{ dagu_oidc_provider }}"
+    clientId: "${DAGU_OIDC_CLIENT_ID}"
+    clientSecret: "${DAGU_OIDC_CLIENT_SECRET}"
+    redirectURL: "{{ dagu_oidc_redirect_url | default('http://' + dagu_host + ':' + dagu_port|string + '/auth/callback') }}"
+{% if dagu_oidc_issuer is defined %}
+    issuer: "{{ dagu_oidc_issuer }}"
+{% endif %}
+{% if dagu_oidc_scopes is defined %}
+    scopes:
+{% for scope in dagu_oidc_scopes %}
+      - "{{ scope }}"
+{% endfor %}
+{% endif %}
+{% endif %}
+
+# Permissions
+permissions:
+  writeDAGs: {{ dagu_permissions_write_dags | default(true) | lower }}
+  runDAGs: {{ dagu_permissions_run_dags | default(true) | lower }}
+
+# UI Configuration
+ui:
+  navbarColor: "{{ dagu_navbar_color }}"
+  navbarTitle: "{{ dagu_navbar_title }}"
+  maxDashboardPageLimit: {{ dagu_ui_max_dashboard_page_limit }}
+  dags:
+    sortField: "{{ dagu_ui_dags_sort_field }}"
+    sortOrder: "{{ dagu_ui_dags_sort_order }}"
+
+{% if dagu_tls_enabled %}
+# TLS Configuration
+tls:
+  certFile: "{{ dagu_tls_cert_file }}"
+  keyFile: "{{ dagu_tls_key_file }}"
+{% if dagu_tls_ca_file %}
+  caFile: "{{ dagu_tls_ca_file }}"
+{% endif %}
+{% endif %}
+
+# Queue System
+queues:
+  enabled: {{ dagu_queues_enabled | lower }}
+{% if dagu_queues_config %}
+  config:
+{% for queue_name, queue_config in dagu_queues_config.items() %}
+    {{ queue_name }}:
+      maxConcurrency: {{ queue_config.maxConcurrency }}
+{% endfor %}
+{% endif %}
+
+{% if dagu_remote_nodes_enabled and dagu_remote_nodes %}
+# Remote Nodes (Multi-Environment Management)
+remoteNodes:
+{% for node in dagu_remote_nodes %}
+  - name: "{{ node.name }}"
+    apiBaseURL: "{{ node.apiBaseURL }}"
+{% if node.isBasicAuth | default(false) %}
+    isBasicAuth: true
+    basicAuthUsername: "{{ node.basicAuthUsername }}"
+    basicAuthPassword: "{{ node.basicAuthPassword }}"
+{% endif %}
+{% if node.isAuthToken | default(false) %}
+    isAuthToken: true
+    authToken: "{{ node.authToken }}"
+{% endif %}
+{% if node.skipTLSVerify | default(false) %}
+    skipTLSVerify: true
+{% endif %}
+{% if node.certFile is defined %}
+    certFile: "{{ node.certFile }}"
+{% endif %}
+{% if node.keyFile is defined %}
+    keyFile: "{{ node.keyFile }}"
+{% endif %}
+{% if node.caFile is defined %}
+    caFile: "{{ node.caFile }}"
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{% if dagu_distributed_mode == "coordinator" %}
+# Coordinator Configuration (Distributed Execution)
+coordinator:
+  host: "{{ dagu_coordinator_host }}"
+  port: {{ dagu_coordinator_port }}
+{% endif %}
+
+{% if dagu_distributed_mode == "worker" %}
+# Worker Configuration (Distributed Execution)
+worker:
+  id: "{{ dagu_worker_id }}"
+  maxActiveRuns: {{ dagu_worker_max_active_runs }}
+  coordinatorHost: "{{ dagu_worker_coordinator_host }}"
+  coordinatorPort: {{ dagu_worker_coordinator_port }}
+{% if dagu_worker_labels %}
+  labels:
+{% for label_key, label_value in dagu_worker_labels.items() %}
+    {{ label_key }}: "{{ label_value }}"
+{% endfor %}
+{% endif %}
+{% endif %}
+
+{% if dagu_peer_tls_enabled and (dagu_distributed_mode in ["coordinator", "worker"]) %}
+# Peer TLS Configuration (for Coordinator/Worker mTLS)
+peer:
+  tls:
+    certFile: "{{ dagu_peer_tls_cert_file }}"
+    keyFile: "{{ dagu_peer_tls_key_file }}"
+    caFile: "{{ dagu_peer_tls_ca_file }}"
+{% endif %}

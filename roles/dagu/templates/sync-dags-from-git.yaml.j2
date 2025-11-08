@@ -1,0 +1,130 @@
+# Git DAG Sync Workflow
+# Managed by Ansible - DO NOT EDIT MANUALLY
+# Syncs DAG files from Git repository to local filesystem
+
+name: sync-dags-from-git
+description: "Sync DAG files from Git repository ({{ git_repo_url }})"
+
+# Schedule - runs {{ git_sync_schedule }}
+schedule: "{{ git_sync_schedule }}"
+
+# Environment variables
+env:
+  - GIT_REPO_URL={{ git_repo_url }}
+  - GIT_BRANCH={{ git_branch }}
+  - DAGS_DIR={{ dagu_install_dir }}/dags
+  - BACKUP_DIR={{ dagu_install_dir }}/dags-backup
+
+params:
+  - FORCE_SYNC=false
+
+steps:
+  - name: validate-git-config
+    description: "Validate Git configuration"
+    command: |
+      if [ -z "${GIT_REPO_URL}" ]; then
+        echo "ERROR: GIT_REPO_URL not configured"
+        exit 1
+      fi
+      echo "Git repo: ${GIT_REPO_URL}"
+      echo "Branch: ${GIT_BRANCH}"
+
+  - name: backup-existing-dags
+    description: "Backup existing DAG files"
+    command: |
+      TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+      BACKUP_PATH="${BACKUP_DIR}/${TIMESTAMP}"
+
+      if [ -d "${DAGS_DIR}" ] && [ "$(ls -A ${DAGS_DIR})" ]; then
+        mkdir -p "${BACKUP_PATH}"
+        rsync -av --exclude='sync-dags-from-git.yaml' "${DAGS_DIR}/" "${BACKUP_PATH}/"
+        echo "Backup created at: ${BACKUP_PATH}"
+      else
+        echo "No existing DAGs to backup"
+      fi
+    depends:
+      - validate-git-config
+
+  - name: clone-or-pull-repo
+    description: "Clone or pull Git repository"
+    command: |
+      TEMP_DIR=$(mktemp -d)
+      trap "rm -rf ${TEMP_DIR}" EXIT
+
+      echo "Cloning repository to ${TEMP_DIR}..."
+      if ! git clone --depth 1 --branch "${GIT_BRANCH}" "${GIT_REPO_URL}" "${TEMP_DIR}"; then
+        echo "ERROR: Failed to clone repository"
+        exit 1
+      fi
+
+      echo "Repository cloned successfully"
+      echo "TEMP_DIR=${TEMP_DIR}" > /tmp/dagu-git-sync.env
+    depends:
+      - backup-existing-dags
+
+  - name: sync-dags
+    description: "Sync DAG files to dags directory"
+    command: |
+      source /tmp/dagu-git-sync.env
+
+      if [ ! -d "${TEMP_DIR}" ]; then
+        echo "ERROR: Temp directory not found"
+        exit 1
+      fi
+
+      # Find DAG files (exclude this sync DAG)
+      DAG_COUNT=$(find "${TEMP_DIR}" -name '*.yaml' -o -name '*.yml' | wc -l)
+
+      if [ "${DAG_COUNT}" -eq 0 ]; then
+        echo "WARNING: No DAG files found in repository"
+        exit 0
+      fi
+
+      echo "Found ${DAG_COUNT} DAG files"
+
+      # Sync DAG files (preserve sync-dags-from-git.yaml)
+      rsync -av \
+        --delete \
+        --exclude='sync-dags-from-git.yaml' \
+        --include='*.yaml' \
+        --include='*.yml' \
+        --exclude='*' \
+        "${TEMP_DIR}/" "${DAGS_DIR}/"
+
+      # Set permissions
+      chown -R {{ dagu_user }}:{{ dagu_group }} "${DAGS_DIR}"
+
+      echo "DAG files synced successfully"
+    depends:
+      - clone-or-pull-repo
+
+  - name: verify-dags
+    description: "Verify synced DAG files"
+    command: |
+      echo "Verifying DAG files in ${DAGS_DIR}..."
+
+      DAG_COUNT=$(find "${DAGS_DIR}" -name '*.yaml' -o -name '*.yml' | wc -l)
+      echo "Total DAG files: ${DAG_COUNT}"
+
+      # List all DAGs (excluding sync DAG)
+      echo "DAG files:"
+      find "${DAGS_DIR}" -name '*.yaml' -o -name '*.yml' | \
+        grep -v 'sync-dags-from-git.yaml' | \
+        sort
+    depends:
+      - sync-dags
+
+  - name: cleanup
+    description: "Cleanup temporary files"
+    command: |
+      rm -f /tmp/dagu-git-sync.env
+      echo "Cleanup completed"
+    depends:
+      - verify-dags
+    continueOn:
+      failure: true
+
+# Notifications (optional - configure based on your setup)
+# mailOn:
+#   failure: true
+#   success: false

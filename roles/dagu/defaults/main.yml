@@ -1,0 +1,213 @@
+---
+# ==============================================================================
+# Dagu Role Default Variables
+# ==============================================================================
+#
+# These are sensible production defaults for Dagu installation.
+# Override these in group_vars for environment-specific changes.
+#
+# See https://github.com/dagu-org/dagu for Dagu's built-in defaults.
+#
+# ==============================================================================
+
+# ----------------------------------------------------------------------------
+# Installation Configuration
+# ----------------------------------------------------------------------------
+dagu_version: "1.24.0"
+dagu_install_dir: "/opt/dagu"
+dagu_config_dir: "/etc/dagu"
+dagu_user: "dagu"
+dagu_group: "dagu"
+dagu_uid: 1500
+dagu_gid: 1500
+dagu_home: "/home/{{ dagu_user }}"
+
+# Dagu directories
+dagu_dirs:
+  - "{{ dagu_install_dir }}/dags"
+  - "{{ dagu_install_dir }}/logs"
+  - "{{ dagu_install_dir }}/logs/admin"
+  - "{{ dagu_install_dir }}/data"
+  - "{{ dagu_install_dir }}/plugins"
+  - "{{ dagu_install_dir }}/suspend"
+  - "{{ dagu_config_dir }}"
+
+# ----------------------------------------------------------------------------
+# Server Configuration
+# ----------------------------------------------------------------------------
+# Host binding
+# - 0.0.0.0: Listen on all interfaces (accessible from network)
+# - 127.0.0.1: Listen on localhost only (local access only)
+# Default: 0.0.0.0 for network accessibility
+dagu_host: "0.0.0.0"
+dagu_port: 8080  # Matches Dagu default
+
+# Timezone for server (default: Asia/Tokyo in Dagu, we use UTC)
+dagu_tz: "UTC"
+
+# Reverse proxy configuration
+dagu_base_path: ""  # e.g., "/dagu" if behind reverse proxy
+dagu_api_base_path: "/api/v2"  # API endpoint base path
+
+# Logging configuration
+dagu_debug: false
+dagu_log_format: "text"  # "text" or "json"
+dagu_headless: false  # Run without Web UI (for worker nodes)
+
+# ----------------------------------------------------------------------------
+# Authentication Configuration
+# ----------------------------------------------------------------------------
+# Basic Authentication
+dagu_enable_basic_auth: false
+dagu_basic_auth_username: "admin"
+# Note: dagu_basic_auth_password should be defined in your inventory/vault
+# Use any secret management solution (Ansible Vault, Bitwarden, HashiCorp Vault, etc.)
+
+# Token Authentication (for CI/CD and API access)
+dagu_enable_token_auth: false
+# Note: dagu_auth_token should be defined in your inventory/vault
+# Example: dagu_auth_token: "your-api-token-here"
+
+# OIDC Authentication (for enterprise SSO)
+dagu_enable_oidc_auth: false
+dagu_oidc_provider: "google"  # google, auth0, keycloak, or custom
+# Note: OIDC credentials should be defined in your inventory/vault
+# dagu_oidc_client_id: "your-client-id"
+# dagu_oidc_client_secret: "your-client-secret"
+# dagu_oidc_redirect_url: "http://your-dagu-server:8080/auth/callback"
+# Optional custom OIDC config:
+# dagu_oidc_issuer: "https://accounts.google.com"  # For custom providers
+# dagu_oidc_scopes: ["openid", "email", "profile"]
+
+# ----------------------------------------------------------------------------
+# Permissions Configuration
+# ----------------------------------------------------------------------------
+dagu_permissions_write_dags: true   # Allow editing DAGs via UI
+dagu_permissions_run_dags: true     # Allow running DAGs via UI
+
+# ----------------------------------------------------------------------------
+# UI Configuration
+# ----------------------------------------------------------------------------
+dagu_navbar_title: "Dagu - {{ inventory_hostname }}"
+dagu_navbar_color: "red"
+dagu_ui_max_dashboard_page_limit: 100  # Results per page
+dagu_ui_dags_sort_field: "name"  # Default sort field
+dagu_ui_dags_sort_order: "asc"  # Sort order (asc/desc)
+
+# ----------------------------------------------------------------------------
+# TLS Configuration
+# ----------------------------------------------------------------------------
+# Disabled by default - use VPN for encryption
+dagu_tls_enabled: false
+dagu_tls_cert_file: ""
+dagu_tls_key_file: ""
+dagu_tls_ca_file: ""  # CA certificate for client cert verification
+
+# ----------------------------------------------------------------------------
+# Queue System Configuration
+# ----------------------------------------------------------------------------
+# Enable queue system for concurrency control
+dagu_queues_enabled: true
+# Define named queues with max concurrency limits
+# Example:
+# dagu_queues_config:
+#   critical:
+#     maxConcurrency: 2
+#   batch:
+#     maxConcurrency: 10
+dagu_queues_config: {}
+
+# ----------------------------------------------------------------------------
+# Base Configuration
+# ----------------------------------------------------------------------------
+# Path to base.yaml for shared DAG defaults
+dagu_base_config_file: "{{ dagu_config_dir }}/base.yaml"
+dagu_create_base_config: false  # Set to true to create a base config
+# Base config content (when dagu_create_base_config is true)
+dagu_base_config_content: |
+  # Shared defaults for all DAGs
+  env:
+    - PATH: /usr/local/bin:/usr/bin:/bin
+  histRetentionDays: 30
+
+# ----------------------------------------------------------------------------
+# Additional Paths
+# ----------------------------------------------------------------------------
+dagu_suspend_flags_dir: "{{ dagu_install_dir }}/suspend"
+dagu_admin_logs_dir: "{{ dagu_install_dir }}/logs/admin"
+
+# ----------------------------------------------------------------------------
+# Git Integration
+# ----------------------------------------------------------------------------
+# Disabled by default - enable in group_vars/dagu_controller.yml if needed
+git_integration_enabled: false
+git_repo_url: ""
+git_branch: "main"
+git_ssh_key: ""
+git_sync_schedule: "*/5 * * * *"
+
+# ----------------------------------------------------------------------------
+# Remote Nodes Configuration (Multi-Environment Management)
+# ----------------------------------------------------------------------------
+# Manage multiple Dagu environments from a central UI
+dagu_remote_nodes_enabled: false
+dagu_remote_nodes: []
+# Example:
+# dagu_remote_nodes:
+#   - name: "development"
+#     apiBaseURL: "http://dev-dagu:8080/api/v2"
+#     isBasicAuth: true
+#     basicAuthUsername: "admin"
+#     basicAuthPassword: "${DEV_DAGU_PASSWORD}"
+#   - name: "staging"
+#     apiBaseURL: "http://staging-dagu:8080/api/v2"
+#     isAuthToken: true
+#     authToken: "${STAGING_DAGU_TOKEN}"
+#   - name: "production"
+#     apiBaseURL: "https://prod-dagu.example.com/api/v2"
+#     isAuthToken: true
+#     authToken: "${PROD_DAGU_TOKEN}"
+#     certFile: "/path/to/client.crt"  # Optional mTLS
+#     keyFile: "/path/to/client.key"
+#     caFile: "/path/to/ca.crt"
+
+# ----------------------------------------------------------------------------
+# Distributed Execution Configuration (Coordinator/Worker via gRPC)
+# ----------------------------------------------------------------------------
+# Enable distributed task execution with coordinator/worker architecture
+dagu_distributed_mode: "none"  # "none", "coordinator", or "worker"
+
+# Coordinator Configuration (when dagu_distributed_mode: "coordinator")
+dagu_coordinator_host: "0.0.0.0"
+dagu_coordinator_port: 50051  # gRPC port
+
+# Worker Configuration (when dagu_distributed_mode: "worker")
+dagu_worker_id: "{{ inventory_hostname }}"  # Unique worker identifier
+dagu_worker_max_active_runs: 100  # Max concurrent tasks on this worker
+dagu_worker_coordinator_host: "coordinator-host"  # Coordinator hostname/IP
+dagu_worker_coordinator_port: 50051
+dagu_worker_labels: {}  # Worker capabilities for task routing
+# Example worker labels:
+# dagu_worker_labels:
+#   region: "eu-north-1"
+#   type: "cpu-intensive"
+#   gpu: "nvidia-a100"
+
+# Peer TLS Configuration (for coordinator/worker mTLS)
+dagu_peer_tls_enabled: false
+dagu_peer_tls_cert_file: ""
+dagu_peer_tls_key_file: ""
+dagu_peer_tls_ca_file: ""
+
+# ----------------------------------------------------------------------------
+# Systemd Service
+# ----------------------------------------------------------------------------
+dagu_service_restart_sec: 10
+dagu_service_restart: "always"
+
+# ----------------------------------------------------------------------------
+# Node Type (Deprecated - use dagu_distributed_mode instead)
+# ----------------------------------------------------------------------------
+# Override in group_vars/dagu_controller.yml or group_vars/dagu_workers.yml
+# This is kept for backwards compatibility with Pattern 2 (Multiple Instances with NFS)
+dagu_node_type: "controller"

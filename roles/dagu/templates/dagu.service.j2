@@ -1,0 +1,45 @@
+# Dagu Systemd Service
+# Managed by Ansible - DO NOT EDIT MANUALLY
+# Node: {{ inventory_hostname }} ({{ dagu_node_type }})
+
+[Unit]
+Description=Dagu Workflow Scheduler
+Documentation=https://dagu.readthedocs.io/
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User={{ dagu_user }}
+Group={{ dagu_group }}
+{% if dagu_node_type == 'controller' %}
+ExecStart=/usr/local/bin/dagu server
+{% else %}
+ExecStart=/usr/local/bin/dagu scheduler
+{% endif %}
+Restart={{ dagu_service_restart }}
+RestartSec={{ dagu_service_restart_sec }}
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths={{ dagu_install_dir }}
+
+# Environment
+Environment="DAGU_HOME={{ dagu_install_dir }}"
+Environment="DAGU_CONFIG={{ dagu_config_dir }}/config.yaml"
+Environment="DAGU_HOST={{ dagu_host }}"
+Environment="DAGU_PORT={{ dagu_port }}"
+{% if dagu_enable_basic_auth %}
+Environment="DAGU_BASIC_AUTH_PASSWORD={{ dagu_basic_auth_password }}"
+{% endif %}
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=dagu
+
+[Install]
+WantedBy=multi-user.target

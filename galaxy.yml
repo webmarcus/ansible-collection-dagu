@@ -1,0 +1,36 @@
+---
+namespace: webmarcus
+name: dagu
+version: 1.0.0
+
+description: Comprehensive Dagu workflow scheduler deployment with distributed execution support
+
+license:
+  - MIT
+
+tags:
+  - dagu
+  - workflow
+  - scheduler
+  - orchestration
+  - distributed
+  - grpc
+  - coordinator
+  - worker
+
+repository: https://github.com/webmarcus/ansible-collection-dagu
+documentation: https://github.com/webmarcus/ansible-collection-dagu/blob/main/README.md
+homepage: https://github.com/webmarcus/ansible-collection-dagu
+issues: https://github.com/webmarcus/ansible-collection-dagu/issues
+
+authors:
+  - Marcus Hernandez <marcus@webmarcus.com>
+
+readme: README.md
+
+build_ignore:
+  - .git
+  - .gitignore
+  - .DS_Store
+  - '*.pyc'
+  - '__pycache__'

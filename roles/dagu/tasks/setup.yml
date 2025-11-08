@@ -1,0 +1,49 @@
+---
+# Dagu user and directory setup
+
+- name: Create dagu group
+  ansible.builtin.group:
+    name: "{{ dagu_group }}"
+    gid: "{{ dagu_gid }}"
+    state: present
+  tags: [dagu, setup, users]
+
+- name: Create dagu user
+  ansible.builtin.user:
+    name: "{{ dagu_user }}"
+    uid: "{{ dagu_uid }}"
+    group: "{{ dagu_group }}"
+    home: "{{ dagu_home }}"
+    shell: /bin/bash
+    comment: "Dagu Service User"
+    create_home: yes
+    state: present
+  tags: [dagu, setup, users]
+
+- name: Create dagu directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ dagu_user }}"
+    group: "{{ dagu_group }}"
+    mode: '0755'
+  loop: "{{ dagu_dirs }}"
+  tags: [dagu, setup, directories]
+
+- name: Create SSH directory for dagu user
+  ansible.builtin.file:
+    path: "{{ dagu_home }}/.ssh"
+    state: directory
+    owner: "{{ dagu_user }}"
+    group: "{{ dagu_group }}"
+    mode: '0700'
+  tags: [dagu, setup, ssh]
+
+- name: Ensure /etc/dagu is owned by root
+  ansible.builtin.file:
+    path: "{{ dagu_config_dir }}"
+    state: directory
+    owner: root
+    group: "{{ dagu_group }}"
+    mode: "0755"
+  tags: [dagu, setup, security]
