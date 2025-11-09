@@ -160,3 +160,40 @@
   until: dagu_health.status is defined and dagu_health.status == 200
   when: not ansible_check_mode
   tags: [dagu, verify]
+
+- name: Trigger initial DAG sync from Git
+  when:
+    - git_integration_enabled
+    - not ansible_check_mode
+  tags: [dagu, git]
+  block:
+    - name: Wait for Dagu to stabilize
+      ansible.builtin.pause:
+        seconds: 5
+
+    - name: Trigger sync-dags-from-git DAG
+      ansible.builtin.uri:
+        url: "http://{{ dagu_host }}:{{ dagu_port }}/api/v2/dags/sync-dags-from-git.yaml/start"
+        method: POST
+        status_code: [200, 201]
+        timeout: 300
+      register: sync_trigger_result
+      retries: 3
+      delay: 5
+      until: sync_trigger_result.status in [200, 201]
+      failed_when: false
+
+    - name: Wait for initial sync to complete
+      ansible.builtin.pause:
+        seconds: 10
+      when: sync_trigger_result.status in [200, 201]
+
+    - name: Display sync trigger result
+      ansible.builtin.debug:
+        msg: >
+          {% if sync_trigger_result.status in [200, 201] %}
+          ✅ Initial DAG sync triggered successfully. All DAG files from {{ git_repo_url }} are being synced.
+          {% else %}
+          ⚠️  Initial DAG sync trigger failed (status: {{ sync_trigger_result.status | default('unknown') }}).
+          You can manually trigger the sync from Dagu UI: http://{{ dagu_host }}:{{ dagu_port }}
+          {% endif %}

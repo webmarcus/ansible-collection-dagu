@@ -5,8 +5,12 @@
 name: sync-dags-from-git
 description: "Sync DAG files from Git repository ({{ git_repo_url }})"
 
-# Schedule - runs {{ git_sync_schedule }}
+{% if git_sync_schedule is defined and git_sync_schedule %}
+# Scheduled sync enabled - runs {{ git_sync_schedule }}
 schedule: "{{ git_sync_schedule }}"
+{% else %}
+# Scheduled sync disabled - trigger manually or via GitHub Actions
+{% endif %}
 
 # Environment variables
 env:

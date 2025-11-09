@@ -139,12 +139,24 @@ dagu_admin_logs_dir: "{{ dagu_install_dir }}/logs/admin"
 # ----------------------------------------------------------------------------
 # Git Integration
 # ----------------------------------------------------------------------------
-# Disabled by default - enable in group_vars/dagu_controller.yml if needed
+# Disabled by default - enable in group_vars/dagu_coordinator.yml if needed
+# When enabled, DAG files are synced from Git repository to local filesystem
 git_integration_enabled: false
 git_repo_url: ""
 git_branch: "main"
-git_ssh_key: ""
-git_sync_schedule: "*/5 * * * *"
+git_ssh_key: ""  # Optional: SSH private key for private repositories
+
+# Scheduled Sync (Optional)
+# Set to desired cron schedule for periodic full sync from Git
+# Common values:
+#   "0 3 * * *"    - Daily at 03:00 (recommended for production backup)
+#   "0 */6 * * *"  - Every 6 hours
+#   "*/30 * * * *" - Every 30 minutes
+#   ""             - Disabled (recommended with GitHub Actions)
+#
+# Default: Daily backup sync at 03:00
+# Users can override to empty string to disable scheduled sync entirely
+git_sync_schedule: "0 3 * * *"
 
 # ----------------------------------------------------------------------------
 # Remote Nodes Configuration (Multi-Environment Management)
