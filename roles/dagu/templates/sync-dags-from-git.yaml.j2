@@ -52,7 +52,12 @@ steps:
   - name: clone-or-pull-repo
     description: "Clone or pull Git repository"
     command: |
-      TEMP_DIR=$(mktemp -d)
+      # Use a persistent temp directory (not mktemp) so it survives between steps
+      TEMP_DIR="/tmp/dagu-git-sync-temp"
+
+      # Clean up any previous failed runs
+      rm -rf "${TEMP_DIR}"
+      mkdir -p "${TEMP_DIR}"
 
       echo "Cloning repository to ${TEMP_DIR}..."
       if ! git clone --depth 1 --branch "${GIT_BRANCH}" "${GIT_REPO_URL}" "${TEMP_DIR}"; then
