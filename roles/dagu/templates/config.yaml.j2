@@ -92,6 +92,11 @@ queues:
 {% endfor %}
 {% endif %}
 
+# Scheduler Configuration
+scheduler:
+  enabled: {{ dagu_scheduler_enabled | default(true) | lower }}
+  evaluationInterval: "{{ dagu_scheduler_interval | default('5s') }}"
+
 {% if dagu_remote_nodes_enabled and dagu_remote_nodes %}
 # Remote Nodes (Multi-Environment Management)
 remoteNodes:
