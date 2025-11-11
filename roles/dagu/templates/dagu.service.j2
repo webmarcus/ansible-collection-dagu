@@ -14,8 +14,14 @@ User={{ dagu_user }}
 Group={{ dagu_group }}
 {% if dagu_distributed_mode == 'worker' %}
 ExecStart=/usr/local/bin/dagu worker
+{% elif dagu_distributed_mode == 'coordinator' %}
+# Coordinator: run start-all with coordinator flags for distributed mode
+ExecStart=/usr/local/bin/dagu start-all \
+  --coordinator.host={{ dagu_coordinator_host }} \
+  --coordinator.port={{ dagu_coordinator_port }}{% if dagu_coordinator_advertise is defined %} \
+  --coordinator.advertise={{ dagu_coordinator_advertise }}{% endif %}
 {% else %}
-# Coordinator or standalone: run start-all (scheduler + web UI + coordinator)
+# Standalone: run start-all (scheduler + web UI only, no coordinator)
 ExecStart=/usr/local/bin/dagu start-all
 {% endif %}
 Restart={{ dagu_service_restart }}

@@ -5,6 +5,18 @@ All notable changes to this Ansible collection will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.6] - 2025-11-11
+
+### Fixed
+- **Coordinator Service Activation:**
+  - Systemd service now passes coordinator CLI flags to `dagu start-all` command
+  - Coordinator is properly started in distributed mode when `dagu_distributed_mode: "coordinator"`
+  - Fixes issue where coordinator remained inactive despite config file settings
+  - CLI flags override config file for coordinator activation (as per Dagu design)
+
+### Changed
+- Systemd service ExecStart now includes `--coordinator.host`, `--coordinator.port`, and `--coordinator.advertise` flags when in coordinator mode
+
 ## [1.1.5] - 2025-11-11
 
 ### Added
@@ -90,6 +102,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+[1.1.6]: https://github.com/webmarcus/ansible-collection-dagu/compare/v1.1.5...v1.1.6
 [1.1.5]: https://github.com/webmarcus/ansible-collection-dagu/compare/v1.1.4...v1.1.5
 [1.1.4]: https://github.com/webmarcus/ansible-collection-dagu/compare/v1.1.3...v1.1.4
 [1.1.3]: https://github.com/webmarcus/ansible-collection-dagu/compare/v1.1.2...v1.1.3

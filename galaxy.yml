@@ -1,7 +1,7 @@
 ---
 namespace: webmarcus
 name: dagu
-version: 1.1.5
+version: 1.1.6
 
 description: Comprehensive Dagu workflow scheduler deployment with distributed execution support
 
