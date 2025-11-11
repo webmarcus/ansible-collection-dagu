@@ -12,10 +12,11 @@ Wants=network-online.target
 Type=simple
 User={{ dagu_user }}
 Group={{ dagu_group }}
-{% if dagu_node_type == 'controller' %}
-ExecStart=/usr/local/bin/dagu server
+{% if dagu_distributed_mode == 'worker' %}
+ExecStart=/usr/local/bin/dagu worker
 {% else %}
-ExecStart=/usr/local/bin/dagu scheduler
+# Coordinator or standalone: run start-all (scheduler + web UI + coordinator)
+ExecStart=/usr/local/bin/dagu start-all
 {% endif %}
 Restart={{ dagu_service_restart }}
 RestartSec={{ dagu_service_restart_sec }}

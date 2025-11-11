@@ -94,8 +94,10 @@ queues:
 
 # Scheduler Configuration
 scheduler:
-  enabled: {{ dagu_scheduler_enabled | default(true) | lower }}
-  evaluationInterval: "{{ dagu_scheduler_interval | default('5s') }}"
+  port: {{ dagu_scheduler_port | default(8090) }}
+  lockStaleThreshold: "{{ dagu_scheduler_lock_stale_threshold | default('30s') }}"
+  lockRetryInterval: "{{ dagu_scheduler_lock_retry_interval | default('5s') }}"
+  zombieDetectionInterval: "{{ dagu_scheduler_zombie_detection_interval | default('45s') }}"
 
 {% if dagu_remote_nodes_enabled and dagu_remote_nodes %}
 # Remote Nodes (Multi-Environment Management)

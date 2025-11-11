@@ -5,6 +5,42 @@ All notable changes to this Ansible collection will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.4] - 2025-11-11
+
+### Fixed
+- **Scheduler and Coordinator Services:**
+  - Changed systemd service from `dagu server` to `dagu start-all` to properly start scheduler, web UI, and coordinator services
+  - Updated scheduler configuration to use official parameters: `port`, `lockStaleThreshold`, `lockRetryInterval`, `zombieDetectionInterval`
+  - Removed non-existent configuration options: `scheduler.enabled` and `scheduler.evaluationInterval`
+  - Fixed distributed mode worker service to use `dagu worker` command
+  - This resolves the issue where Scheduler Service and Coordinator Service showed as "Inactive" in the System Status dashboard
+
+### Changed
+- Systemd service template now uses `dagu_distributed_mode` instead of deprecated `dagu_node_type`
+- Scheduler configuration now follows official Dagu documentation standards
+
+## [1.1.3] - 2025-11-11
+
+### Fixed
+- **Scheduler Configuration:**
+  - Added missing scheduler configuration section to config.yaml template
+  - This was causing scheduled DAGs to never run (e.g., 03:00 daily sync)
+
+## [1.1.2] - 2025-11-10
+
+### Fixed
+- **Git Sync DAG:**
+  - Changed from `mktemp -d` to persistent named directory `/tmp/dagu-git-sync-temp`
+  - Fixes "ERROR: Temp directory not found" when sync-dags step runs
+  - Ensures temp directory persists between Dagu step executions
+
+## [1.1.1] - 2025-11-10
+
+### Fixed
+- **Git Sync DAG:**
+  - Attempted fix for temp directory issue (unsuccessful)
+  - Removed EXIT trap
+
 ## [1.1.0] - 2025-11-09
 
 ### Added
@@ -42,5 +78,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+[1.1.4]: https://github.com/webmarcus/ansible-collection-dagu/compare/v1.1.3...v1.1.4
+[1.1.3]: https://github.com/webmarcus/ansible-collection-dagu/compare/v1.1.2...v1.1.3
+[1.1.2]: https://github.com/webmarcus/ansible-collection-dagu/compare/v1.1.1...v1.1.2
+[1.1.1]: https://github.com/webmarcus/ansible-collection-dagu/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/webmarcus/ansible-collection-dagu/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/webmarcus/ansible-collection-dagu/releases/tag/v1.0.0
