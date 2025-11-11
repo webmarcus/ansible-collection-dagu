@@ -19,7 +19,10 @@ ExecStart=/usr/local/bin/dagu worker
 ExecStart=/usr/local/bin/dagu start-all \
   --coordinator.host={{ dagu_coordinator_host }} \
   --coordinator.port={{ dagu_coordinator_port }}{% if dagu_coordinator_advertise is defined %} \
-  --coordinator.advertise={{ dagu_coordinator_advertise }}{% endif %}
+  --coordinator.advertise={{ dagu_coordinator_advertise }}
+{% else %}
+
+{% endif %}
 {% else %}
 # Standalone: run start-all (scheduler + web UI only, no coordinator)
 ExecStart=/usr/local/bin/dagu start-all

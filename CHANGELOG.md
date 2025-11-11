@@ -5,6 +5,14 @@ All notable changes to this Ansible collection will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.7] - 2025-11-11
+
+### Fixed
+- **Systemd Service Multiline Format:**
+  - Fixed Jinja2 template formatting for multiline ExecStart in systemd service
+  - Coordinator advertise address now correctly set without trailing text from next line
+  - Resolves issue where `--coordinator.advertise` included "Restart=always" suffix
+
 ## [1.1.6] - 2025-11-11
 
 ### Fixed
@@ -102,6 +110,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+[1.1.7]: https://github.com/webmarcus/ansible-collection-dagu/compare/v1.1.6...v1.1.7
 [1.1.6]: https://github.com/webmarcus/ansible-collection-dagu/compare/v1.1.5...v1.1.6
 [1.1.5]: https://github.com/webmarcus/ansible-collection-dagu/compare/v1.1.4...v1.1.5
 [1.1.4]: https://github.com/webmarcus/ansible-collection-dagu/compare/v1.1.3...v1.1.4
