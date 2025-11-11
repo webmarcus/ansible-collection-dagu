@@ -134,6 +134,9 @@ remoteNodes:
 coordinator:
   host: "{{ dagu_coordinator_host }}"
   port: {{ dagu_coordinator_port }}
+{% if dagu_coordinator_advertise is defined %}
+  advertise: "{{ dagu_coordinator_advertise }}"
+{% endif %}
 {% endif %}
 
 {% if dagu_distributed_mode == "worker" %}
