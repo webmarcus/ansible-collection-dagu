@@ -5,6 +5,15 @@ All notable changes to this Ansible collection will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.8] - 2025-11-11
+
+### Fixed
+- **Initial DAG Sync API Call:**
+  - Fixed API request to `/api/v2/dags/{dagName}/start` endpoint
+  - Added required `Content-Type: application/json` and `Accept: application/json` headers
+  - Added empty JSON body `{}` as required by Dagu API specification
+  - Resolves 500 Internal Server Error when triggering initial Git DAG sync during deployment
+
 ## [1.1.7] - 2025-11-11
 
 ### Fixed
@@ -110,6 +119,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+[1.1.8]: https://github.com/webmarcus/ansible-collection-dagu/compare/v1.1.7...v1.1.8
 [1.1.7]: https://github.com/webmarcus/ansible-collection-dagu/compare/v1.1.6...v1.1.7
 [1.1.6]: https://github.com/webmarcus/ansible-collection-dagu/compare/v1.1.5...v1.1.6
 [1.1.5]: https://github.com/webmarcus/ansible-collection-dagu/compare/v1.1.4...v1.1.5

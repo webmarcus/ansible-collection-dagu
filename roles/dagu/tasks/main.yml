@@ -175,6 +175,11 @@
       ansible.builtin.uri:
         url: "http://{{ dagu_host }}:{{ dagu_port }}/api/v2/dags/sync-dags-from-git.yaml/start"
         method: POST
+        headers:
+          Content-Type: "application/json"
+          Accept: "application/json"
+        body: "{}"
+        body_format: json
         status_code: [200, 201]
         timeout: 300
       register: sync_trigger_result
