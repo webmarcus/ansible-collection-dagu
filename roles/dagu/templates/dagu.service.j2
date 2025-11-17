@@ -19,7 +19,8 @@ ExecStart=/usr/local/bin/dagu worker
 ExecStart=/usr/local/bin/dagu start-all \
   --coordinator.host={{ dagu_coordinator_host }} \
   --coordinator.port={{ dagu_coordinator_port }}{% if dagu_coordinator_advertise is defined %} \
-  --coordinator.advertise={{ dagu_coordinator_advertise }}
+  --coordinator.advertise={{ dagu_coordinator_advertise }} \
+  --peer.insecure
 {% else %}
 
 {% endif %}
