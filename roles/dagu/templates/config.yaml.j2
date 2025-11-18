@@ -24,6 +24,7 @@ paths:
   suspendFlagsDir: "{{ dagu_suspend_flags_dir }}"
   adminLogsDir: "{{ dagu_admin_logs_dir }}"
 {% if dagu_distributed_mode in ["coordinator", "worker"] %}
+  # Service Registry: Explicit NFS path for coordinator/worker discovery (v1.2.1)
   serviceRegistryDir: "{{ dagu_service_registry_dir | default(dagu_install_dir + '/shared/service-registry') }}"
 {% endif %}
 {% if dagu_create_base_config %}
