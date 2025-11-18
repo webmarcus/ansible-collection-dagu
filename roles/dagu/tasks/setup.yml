@@ -47,3 +47,16 @@
     group: "{{ dagu_group }}"
     mode: "0755"
   tags: [dagu, setup, security]
+
+- name: Create service registry subdirectories (distributed mode)
+  when: dagu_distributed_mode in ['coordinator', 'worker']
+  ansible.builtin.file:
+    path: "{{ dagu_service_registry_dir | default(dagu_install_dir + '/shared/service-registry') }}/{{ item }}"
+    state: directory
+    owner: "{{ dagu_user }}"
+    group: "{{ dagu_group }}"
+    mode: '0755'
+  loop:
+    - coordinator
+    - worker
+  tags: [dagu, setup, directories, distributed]
