@@ -32,6 +32,9 @@ dagu_dirs:
   - "{{ dagu_install_dir }}/suspend"
   - "{{ dagu_config_dir }}"
 
+# Configuration file permissions
+config_file_mode: "0644"  # Readable by all, writable by owner
+
 # ----------------------------------------------------------------------------
 # Server Configuration
 # ----------------------------------------------------------------------------
