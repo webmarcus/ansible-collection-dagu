@@ -1,10 +1,11 @@
 ---
 # Dagu installation and configuration
 
-- name: Stop Dagu service before making changes
+- name: Stop and disable Dagu service before making changes
   ansible.builtin.systemd:
     name: dagu
     state: stopped
+    enabled: no
   become: yes
   failed_when: false
   tags: [dagu, service]
