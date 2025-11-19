@@ -1,6 +1,14 @@
 ---
 # Dagu installation and configuration
 
+- name: Reset Tailscale serve configuration before changes
+  ansible.builtin.command: tailscale serve reset
+  become: yes
+  failed_when: false
+  changed_when: false
+  when: dagu_distributed_mode == 'coordinator'
+  tags: [dagu, service, tailscale]
+
 - name: Stop and disable Dagu service before making changes
   ansible.builtin.systemd:
     name: dagu
@@ -8,6 +16,17 @@
     enabled: no
   become: yes
   failed_when: false
+  tags: [dagu, service]
+
+- name: Kill any remaining Dagu processes
+  ansible.builtin.shell: pkill -9 dagu || true
+  become: yes
+  changed_when: false
+  tags: [dagu, service]
+
+- name: Wait a moment for processes to terminate
+  ansible.builtin.pause:
+    seconds: 2
   tags: [dagu, service]
 
 - name: Wait for Web UI port to be released
