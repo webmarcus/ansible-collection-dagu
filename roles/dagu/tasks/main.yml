@@ -1,6 +1,31 @@
 ---
 # Dagu installation and configuration
 
+- name: Stop Dagu service before making changes
+  ansible.builtin.systemd:
+    name: dagu
+    state: stopped
+  become: yes
+  failed_when: false
+  tags: [dagu, service]
+
+- name: Wait for Web UI port to be released
+  ansible.builtin.wait_for:
+    port: "{{ dagu_port | default(8080) }}"
+    state: stopped
+    timeout: 30
+  failed_when: false
+  tags: [dagu, service]
+
+- name: Wait for coordinator port to be released
+  ansible.builtin.wait_for:
+    port: "{{ dagu_coordinator_port | default(50051) }}"
+    state: stopped
+    timeout: 30
+  when: dagu_distributed_mode == 'coordinator'
+  failed_when: false
+  tags: [dagu, service]
+
 - name: Setup dagu user and directories
   ansible.builtin.include_tasks: setup.yml
   tags: [dagu, setup]
